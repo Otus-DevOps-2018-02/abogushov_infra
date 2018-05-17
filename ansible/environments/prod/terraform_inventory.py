@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """
-Provides an inventory of stage environment of terraform.
+Provides an inventory of terraform
 """
 import argparse
 import json
@@ -17,8 +17,16 @@ def get_terraform_output(name):
     return r.strip()
 
 
+# Determine different paths
+env_path = os.path.dirname(os.path.abspath(__file__))
+env = os.path.basename(env_path)
+
+terraform_path = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(env_path))), 'terraform')
+env_terraform_path = os.path.join(terraform_path, env)
+
 if args.list:
-    os.chdir('../terraform/stage')
+    os.chdir(env_terraform_path)
     app_external_ip = get_terraform_output('app_external_ip')
     db_external_ip = get_terraform_output('db_external_ip')
     db_internal_ip = get_terraform_output('db_internal_ip')
@@ -26,7 +34,7 @@ if args.list:
     print(json.dumps({
         'app': {
             'hosts': [app_external_ip],
-            'vars': {'db_internal_ip': db_internal_ip}
+            'vars': {'db_host': db_internal_ip}
         },
         'db': [db_external_ip],
     }))
